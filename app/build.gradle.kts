@@ -57,4 +57,5 @@ dependencies {
     kapt (libs.room.compiler)
     implementation (libs.androidx.room.paging)
     implementation (libs.androidx.room.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 }

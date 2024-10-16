@@ -1,22 +1,18 @@
 package com.example.mvvmroomapplication
 
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.room.Room
+import androidx.lifecycle.ViewModelProvider
 import com.example.mvvmroomapplication.databinding.ActivityMainBinding
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
-
+    private lateinit var db: QuotesDatabase
+    private lateinit var repo: QuotesRepository
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -26,19 +22,18 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val db = Room.databaseBuilder(
-            applicationContext, ContactDB::class.java, "contacts"
-        ).build()
+        db = QuotesDatabase.getInstance(this)
+        repo = QuotesRepository(db.quotesDao())
+        val viewModel =
+            ViewModelProvider(this, QuotesViewmodelFactory(repo))[QuotesViewModel::class.java]
 
-        GlobalScope.launch {
-            db.contactDao().insertContact(Contact(0, "Subham", "9876543210"))
+        viewModel.getQuotes().observe(this) {
+            binding.text2.text = it.toString()
         }
 
         binding.btnPain.setOnClickListener {
-            db.contactDao().getContact().observe(this) {
-                Log.d("Subham", it.toString())
-            }
-
+            val q = Quotes(1, "text", "test")
+            viewModel.insertQuotes(q)
         }
     }
 }
